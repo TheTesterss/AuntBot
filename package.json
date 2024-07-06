@@ -1,0 +1,24 @@
+{
+  "name": "aunt-development",
+  "version": "0.0.1",
+  "repository": {
+    "url": "https://github.com/Testers3333/AuntClient.git"
+  },
+  "description": "An usefull discord bot to increase your discord experience",
+  "main": "src/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon src/main.js"
+  },
+  "author": "testers3333",
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {
+    "colors": "^1.4.0",
+    "discord.js": "^14.15.3",
+    "dotenv": "^16.4.5",
+    "fs": "^0.0.1-security",
+    "mongoose": "^8.4.4",
+    "nodemon": "^3.1.4"
+  }
+}
