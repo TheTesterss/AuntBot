@@ -33,12 +33,14 @@ const errorEmbed = async (bot, interaction, description, reason, command) => {
                 value: `${bot.emojisList.chat} - Missed permissions: \`n>>> ${command.permissions.filter((permission) => !interaction.member.permissions.has(PermissionsBitField.Flags[permission])).map((permission) => permissions[permission]).join("\n")}`,
                 inline: false
             })
+            break;
         case "botPerms":
             embed.addFields({
                 name: `<t:${Math.round(Date.now() / 1000)}:R>`,
                 value: `${bot.emojisList.chat} - Missed permissions: \n>>> ${command.botPermissions.filter((permission) => !interaction.guild.members.me.permissions.has(PermissionsBitField.Flags[permission])).map((permission) => permissions[permission]).join("\n")}`,
                 inline: false
             })
+            break;
     }
 
     return await interaction.reply({embeds: [embed]})

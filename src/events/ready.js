@@ -1,4 +1,5 @@
-const { Client } = require("discord.js")
+const { Client } = require("discord.js");
+const Database = require("../handlers/DatabaseManager");
 
 module.exports = {
     name: "ready",
@@ -6,8 +7,12 @@ module.exports = {
     /**
      * 
      * @param {Client} bot 
+     * @param {Database} db
      */
-    execute: (bot) => {    
+    execute: async (bot, db) => {    
         require("../handlers/SlashsManager")(bot);
+
+        db.initializateGuilds();
+        db.initializateBot();
     }
 }

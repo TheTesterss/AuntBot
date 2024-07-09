@@ -1,3 +1,5 @@
+require("dotenv").config();
+const Database = require("./handlers/DatabaseManager");
 const { Client, IntentsBitField, Partials, Collection } = require("discord.js");
 const bot = new Client({
     intents: [
@@ -20,8 +22,8 @@ const bot = new Client({
         Partials.User
     ]
 });
+
 require("colors");
-require("dotenv").config();
 require("./handlers/EventManager")(bot);
 bot.emojisList = require("./util/emojis.json");
 bot.colors = require("./util/colors.json");
@@ -49,3 +51,8 @@ bot.login(process.env.TOKEN)
     .catch((err) => {
         console.error("Current bot token is not valid.".bgRed, err);
     })
+
+const db = new Database({serverSelectionTimeoutMS: 5_000, poolSize: 10, family: 4}, bot);
+db.connect(process.env.MONGOURI);
+//db.clearDatas() // Enable this when you wanna reset your database, You can't get any deleted data, be carefull.
+bot.db = db;

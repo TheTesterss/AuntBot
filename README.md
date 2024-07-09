@@ -9,8 +9,6 @@
 - [🛠・Future updates](#updates)
 - [💼・Term](#terms)
 - [🕵️‍♂️・Authors](#authors)
-- [🪄・Main discord](https://discord.gg/q3u2CgTTvu)
-- [🔮・Support discord](https://discord.gg/zcode)
 
 ## <a id="setup"></a> 📁 〢 Setting up
 
@@ -23,7 +21,12 @@ OWNER=YOUR_ID
 ```
 4. Download [these emojis](https://github.com/TheTesterss/AuntBot/tree/main/src/emojis/)
 5. One time downloaded, put them on a server where your bot has full access.
-6. Open a terminal and enter this command: npm start
+6. Open a terminal and enter this command:
+```
+yarn install
+yarn add mongoose discord.js fs dotenv colors nodemon
+npm start
+```
 7. Enjoy the bot !
 
 ## <a id="updates"></a> 🛠 〢 Future updates

@@ -2,8 +2,8 @@ const { Client, CommandInteraction, EmbedBuilder } = require("discord.js");
 const Database = require("../../handlers/DatabaseManager");
 
 module.exports = {
-    name: "ping",
-    descripiton: "Show the differents latencies of the client.",
+    name: "whitelist",
+    descripiton: "Manage users whitelist.",
     acceptDirectMessages: null,
     permissions: [],
     botPermissions: [],
@@ -21,20 +21,32 @@ module.exports = {
      * @param {Database} db 
      */
     execute: async (bot, interaction, db) => {
+        let list = await db.getValue("client", bot.user.id, "whitelist");
+
         const embed = new EmbedBuilder()
         .setColor(bot.colors.true)
         .setFooter({
             "text": "Powered by Aunt Development.",
             "iconURL": bot.user.displayAvatarURL({extension: "png", forceStatic: false, size: 2048})
         })
+        .setDescription(`${bot.emojisList.chat} - **You're managing the white list.**`)
+        
+        if(list.length < 1) {
+            embed
+            .addFields({
+                name: `<t:${Math.round(Date.now() / 1000)}:R>`,
+                value: `${bot.emojisList.user} - There's no user on the list.`,
+                inline: false
+            })
+        } else {
+            embed
+            .addFields({
+                name: `<t:${Math.round(Date.now() / 1000)}:R>`,
+                value: list.map((id) => `${bot.emojisList.user} - <@${id}> - \`${id}\``).join("\n"),
+                inline: false
+            })
+        }
 
-        let message = await interaction.editReply({embeds: [embed.setDescription(`${bot.emojisList.chat} - **Fetching latencies...**`)]})
-        await message.edit({
-            embeds: [
-                embed
-                .setDescription(`${bot.emojisList.chat} - **Latencies fetched!**`)
-                .addFields({name: `<t:${Math.round(Date.now() / 1000)}:R>`, value: `${bot.emojisList.stats} - **Passerelle discord** - \`${bot.ws.ping}ms\`\n${bot.emojisList.support} - **Réponses** - \`${Math.round(Date.now() - message.createdTimestamp)}ms\``, inline: false})
-            ]
-        })
+        await interaction.editReply({embeds: [embed]})
     }
 }

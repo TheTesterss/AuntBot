@@ -21,9 +21,9 @@ const repairCommand = (command) => {
     command.options ??= []
     command.ephemeral ??= false
     command.permissions ??= []
-    command.botPermissions ??= ["EmbedLinks"]
+    command.botPermissions ??= []
     if(command.botPermissions.length == 0) 
-        command.botPermissions = ["EmbedLinks"]
+        command.botPermissions = []
 }
 
 /**
@@ -41,7 +41,7 @@ const createSlash = (command) => {
 
     if(command.options?.length < 1) slash.options = []
     for(const option of command.options) {
-        slash[`add${option.type.charAt(0).toUpperCase() + string.slice(1)}Option`]((option) => {
+        slash[`add${option.type.charAt(0).toUpperCase() + option.type.slice(1)}Option`]((option) => {
             option
             .setName(option.name)
             .setDescription(option.description)
@@ -76,6 +76,7 @@ module.exports = async (bot) => {
 
         for(const file of files) {
             let command = require(`../commands/${subFolder}/${file}`);
+
             /*  EVENT DATAS EXAMPLE:
             module.exports = {
                 name: string,
@@ -93,7 +94,6 @@ module.exports = async (bot) => {
                 execute: (bot, command, db) => {}
             }
             */
-            
             repairCommand(command)
             if(!command || !command.name)
                 throw new Error(
@@ -109,7 +109,8 @@ module.exports = async (bot) => {
                     "The command name must be between 2 and 32 chars", `${chars.length} chars actually`, command.name
                 )
 
-            commands.push(createSlash(command).toJSON())
+            let slash = createSlash(command).toJSON()
+            commands.push(slash)
         }
     }
 

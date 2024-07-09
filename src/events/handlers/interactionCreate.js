@@ -1,19 +1,19 @@
 const { Client, Interaction, InteractionType, PermissionsBitField, GuildMember } = require("discord.js");
 const fs = require("fs");
 const { errorEmbed } = require("../../util/embeds");
+const Database = require("../../handlers/DatabaseManager");
 
 /**
  * 
  * @param {[]} perms 
  * @param {GuildMember} member 
  */
-const hasAllPerms = (perms, member) => {
+const MissPerms = (perms, member) => {
     let notIncluded = []
     for(const perm of perms) {
         if(!member.permissions.has(PermissionsBitField.Flags[perm]))
             notIncluded.push(perm)
     }
-
 
     return notIncluded.length > 0;
 }
@@ -36,9 +36,9 @@ const repairCommand = (command) => {
     command.options ??= []
     command.ephemeral ??= false
     command.permissions ??= []
-    command.botPermissions ??= ["EmbedLinks"]
+    command.botPermissions ??= []
     if(command.botPermissions.length == 0) 
-        command.botPermissions = ["EmbedLinks"]
+        command.botPermissions = []
 }
 
 module.exports = {
@@ -47,40 +47,45 @@ module.exports = {
     /**
      * 
      * @param {Client} bot 
+     * @param {Database} db
      * @param {Interaction} interaction 
      */
-    execute: async (bot, interaction) => {
-        if(interaction.type == InteractionType.ApplicationCommand) {
-            let subFolders = fs
-            .readdirSync("./src/commands/")
+    execute: async (bot, db, interaction) => {
+        if(interaction.type !== InteractionType.ApplicationCommand) return;
+        let subFolders = fs
+        .readdirSync("./src/commands/")
 
-            for(const subFolder of subFolders) {
-                let files = fs
-                .readdirSync(`./src/commands/${subFolder}`)
+        for(const subFolder of subFolders) {
+            let files = fs
+            .readdirSync(`./src/commands/${subFolder}`)
 
-                for(const file of files) {
-                    if(file.replace(".js", "") !== interaction.commandName) return;
-                    const command = require(`../../commands/${subFolder}/${file}`);
-                    repairCommand(command);
+            for(const file of files) {
+                console.log(interaction.commandName === file.replace(".js", ""), file)
+                if(file.replace(".js", "") !== interaction.commandName) return;
+                const command = require(`../../commands/${subFolder}/${file}`);
+                repairCommand(command);
 
-                    if(command.voiceOnly && !interaction.member.voice.channel)
-                        return void errorEmbed(bot, interaction, "You must be in a discord voice/stage channel!", null, command);
+                if(command.voiceOnly && !interaction.member.voice.channel)
+                    return void errorEmbed(bot, interaction, "You must be in a discord voice/stage channel!", null, command);
 
-                    if(command.ownerOnly && process.env.OWNER !== interaction.user.id)
-                        return void errorEmbed(bot, interaction, "You're not the bot owner.", null, command);
+                if((command.ownerOnly && process.env.OWNER !== interaction.user.id) && (command.whitelistAllowed && !(await db.getValue("client", bot.user.id, "whitelist")).includes(interaction.user.id)))
+                    return void errorEmbed(bot, interaction, "You're not the bot owner.", null, command);
 
-                    if(command.adminOnly && interaction.member.permissions.has(PermissionsBitField.Flags.Administrator))
-                        return void errorEmbed(bot, interaction, "You must be an administrator of the guild.", null, command);
+                if((command.adminOnly && interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) && (command.whitelistAllowed && !(await db.getValue("client", bot.user.id, "whitelist")).includes(interaction.user.id)))
+                    return void errorEmbed(bot, interaction, "You must be an administrator of the guild.", null, command);
 
-                    if(hasAllPerms(command.permissions, interaction.member))
-                        return void errorEmbed(bot, interaction, "You're missing few perms.", "userPerms", command)
+                if(MissPerms(command.permissions, interaction.member) && (command.whitelistAllowed && !(await db.getValue("client", bot.user.id, "whitelist")).includes(interaction.user.id)))
+                    return void errorEmbed(bot, interaction, "You're missing few perms.", "userPerms", command)
 
-                    if(hasAllPerms(command.botPermissions, interaction.guild.members.me))
-                        return void errorEmbed(bot, interaction, "I'm missing few permissions.", "botPerms", command)
+                if(MissPerms(command.botPermissions, interaction.guild.members.me))
+                    return void errorEmbed(bot, interaction, "I'm missing few permissions.", "botPerms", command)
 
-                    if(!interaction.deferred) await interaction.deferReply({ephemeral: command.ephemeral});
-                    command.execute(bot, interaction, db = null)
-                }
+                if(!command.blacklistAllowed && (await db.getValue("client", bot.user.id, "blacklist")).includes(interaction.user.id))
+                    return void errorEmbed(bot, interaction, "You're currently blacklisted from the client.", null, command)
+
+                if(!interaction.deferred) await interaction.deferReply({ephemeral: command.ephemeral});
+
+                command.execute(bot, interaction, db)
             }
         }
     }

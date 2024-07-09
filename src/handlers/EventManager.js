@@ -31,7 +31,7 @@ const runEvent = (bot, event1, event2) => {
             "This event doesn't correspond to a correct discord event.", event2 ? `${event1}/${event2}` : event1
         )
 
-    bot[datas.once ? "once" : "on"](datas.name, async (...args) => datas.execute(bot, ...args))
+    bot[datas.once ? "once" : "on"](datas.name, async (...args) => datas.execute(bot, bot.db, ...args))
     console.log(`Connection established with file event: /${event2 ? `${event1}/${event2}` : event1}`.bgGreen)
 }
 
