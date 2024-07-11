@@ -1,4 +1,4 @@
-const { EmbedBuilder, Client, CommandInteraction, PermissionsBitField } = require("discord.js");
+const { EmbedBuilder, Client, CommandInteraction, PermissionsBitField, Message } = require("discord.js");
 
 /**
  * 
@@ -7,8 +7,9 @@ const { EmbedBuilder, Client, CommandInteraction, PermissionsBitField } = requir
  * @param {string} description
  * @param {string} reason
  * @param {{name: string, description: string, acceptDirectMessages: true | null, voiceOnly: boolean, ownerOnly: boolean, adminOnly: boolean, blacklistAllowed: boolean, whitelistAllowed: boolean, permissions: [], botPermissions: [], options: ApplicationCommandOptionBase, ephemeral: boolean, execute: (bot, command, db) => {}}} command
+ * @param {boolean} ephemeral
  */
-const errorEmbed = async (bot, interaction, description, reason, command) => {
+const errorEmbed = async (bot, interaction, description, reason, command, ephemeral) => {
     let permissions = {
         "Administrator": `${bot.emojisList.admin} - Administrator`,
         "ManageMembers": `${bot.emojisList.mod} - Ban and/or kick`,
@@ -18,12 +19,9 @@ const errorEmbed = async (bot, interaction, description, reason, command) => {
         "ManageGuild": `${bot.emojisList.community} - Manage guild`
     }
 
-    let embed = await new EmbedBuilder()
+    let embed = new EmbedBuilder()
     .setDescription(`**${description}**`)
-    .setFooter({
-        "text": "Powered by Aunt Development.",
-        "iconURL": bot.user.displayAvatarURL({extension: "png", forceStatic: false, size: 2048})
-    })
+    .setFooter({"text": "Powered by Aunt Development.", "iconURL": bot.user.displayAvatarURL({extension: "png", forceStatic: false, size: 2048})})
     .setColor(bot.colors.false)
     
     switch (reason) {
@@ -43,7 +41,9 @@ const errorEmbed = async (bot, interaction, description, reason, command) => {
             break;
     }
 
-    return await interaction.reply({embeds: [embed]})
+    if(interaction.commandId)
+        return await interaction.editReply({embeds: [embed], ephemeral: ephemeral ?? false})
+    return await interaction.reply({embeds: [embed], ephemeral: ephemeral ?? false})
 }
 
 module.exports = {

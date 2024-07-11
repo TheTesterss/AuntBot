@@ -8,5 +8,10 @@
     "automod": "<:icon_bot_automod:1238931377181954068>",
     "stats": "<:icon_bot_activity:1238931392851742902>",
     "support": "<:icon_bot_support:1238931400758005840>",
-    "user": "<:icon_bot_members:1238931394596573304>"
+    "user": "<:icon_bot_members:1238931394596573304>",
+    "ben": "<:icon_bot_delete:1260257201402937385>",
+    "leftarrow": "<:icon_bot_arrowleft:1260257283363962931>",
+    "rightarrow": "<:icon_bot_arrowright:1260257515560632362>",
+    "leave": "<:icon_bot_leave:1260257574855508162>",
+    "join": "<:icon_bot_join:1260257621282390036>"
 }

@@ -1,6 +1,6 @@
 require("dotenv").config();
 const Database = require("./handlers/DatabaseManager");
-const { Client, IntentsBitField, Partials, Collection } = require("discord.js");
+const { Client, IntentsBitField, Partials } = require("discord.js");
 const bot = new Client({
     intents: [
         IntentsBitField.Flags.GuildEmojisAndStickers,

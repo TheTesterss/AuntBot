@@ -3,14 +3,14 @@
 </h1>
 
 ---
-## <a id="menu"></a>🍃 〢 Menu
+### <a id="menu"></a>🍃 〢 Menu
 
 - [⚙️・Setting up](#setup)
 - [🛠・Future updates](#updates)
 - [💼・Term](#terms)
 - [🕵️‍♂️・Authors](#authors)
 
-## <a id="setup"></a> 📁 〢 Setting up
+### <a id="setup"></a> 📁 〢 Setting up
 
 1. Download [NodeJS](https://nodejs.org/)
 2. Download these codes.
@@ -29,10 +29,11 @@ npm start
 ```
 7. Enjoy the bot !
 
-## <a id="updates"></a> 🛠 〢 Future updates
+### <a id="updates"></a> 🛠 〢 Future updates
 
-- [x] Database handler
-- [x] Whitelist, Blacklist systems
+- [x] Help
+- [x] Informations commands
+- [x] Restart command on discord.
 
 ### <a id="terms"></a>💼 〢 Terms Of Usage
 

@@ -112,7 +112,7 @@ module.exports = class Database {
         if(!returns) {
             await this.ClientDB.create({
                 id: this.bot.user.id,
-                whitelist: ["792721462783377438", "855828456470478918"],
+                whitelist: [],
                 blacklist: []
             })
 

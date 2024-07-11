@@ -51,7 +51,7 @@ module.exports = {
      * @param {Interaction} interaction 
      */
     execute: async (bot, db, interaction) => {
-        if(interaction.type !== InteractionType.ApplicationCommand) return;
+        if(!interaction.isChatInputCommand()) return;
         let subFolders = fs
         .readdirSync("./src/commands/")
 
@@ -59,33 +59,33 @@ module.exports = {
             let files = fs
             .readdirSync(`./src/commands/${subFolder}`)
 
+
             for(const file of files) {
-                console.log(interaction.commandName === file.replace(".js", ""), file)
-                if(file.replace(".js", "") !== interaction.commandName) return;
-                const command = require(`../../commands/${subFolder}/${file}`);
-                repairCommand(command);
+                if(file.replace(".js", "") === interaction.commandName) {
+                    const command = require(`../../commands/${subFolder}/${file}`);
+                    if(!interaction.deferred) await interaction.deferReply({ephemeral: command.ephemeral ?? false});
+                    repairCommand(command);
 
-                if(command.voiceOnly && !interaction.member.voice.channel)
-                    return void errorEmbed(bot, interaction, "You must be in a discord voice/stage channel!", null, command);
+                    if(command.voiceOnly && !interaction.member.voice.channel)
+                        return void await errorEmbed(bot, interaction, "You must be in a discord voice/stage channel!", null, command);
 
-                if((command.ownerOnly && process.env.OWNER !== interaction.user.id) && (command.whitelistAllowed && !(await db.getValue("client", bot.user.id, "whitelist")).includes(interaction.user.id)))
-                    return void errorEmbed(bot, interaction, "You're not the bot owner.", null, command);
+                    if((command.ownerOnly && process.env.OWNER !== interaction.user.id) && (command.whitelistAllowed && !(await db.getValue("client", bot.user.id, "whitelist")).includes(interaction.user.id)))
+                        return void await errorEmbed(bot, interaction, "You're not the bot owner.", null, command);
 
-                if((command.adminOnly && interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) && (command.whitelistAllowed && !(await db.getValue("client", bot.user.id, "whitelist")).includes(interaction.user.id)))
-                    return void errorEmbed(bot, interaction, "You must be an administrator of the guild.", null, command);
+                    if((command.adminOnly && interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) && (command.whitelistAllowed && !(await db.getValue("client", bot.user.id, "whitelist")).includes(interaction.user.id)))
+                        return void await errorEmbed(bot, interaction, "You must be an administrator of the guild.", null, command);
 
-                if(MissPerms(command.permissions, interaction.member) && (command.whitelistAllowed && !(await db.getValue("client", bot.user.id, "whitelist")).includes(interaction.user.id)))
-                    return void errorEmbed(bot, interaction, "You're missing few perms.", "userPerms", command)
+                    if(MissPerms(command.permissions, interaction.member) && (command.whitelistAllowed && !(await db.getValue("client", bot.user.id, "whitelist")).includes(interaction.user.id)))
+                        return void await errorEmbed(bot, interaction, "You're missing few perms.", "userPerms", command)
 
-                if(MissPerms(command.botPermissions, interaction.guild.members.me))
-                    return void errorEmbed(bot, interaction, "I'm missing few permissions.", "botPerms", command)
+                    if(MissPerms(command.botPermissions, interaction.guild.members.me))
+                        return void await errorEmbed(bot, interaction, "I'm missing few permissions.", "botPerms", command)
 
-                if(!command.blacklistAllowed && (await db.getValue("client", bot.user.id, "blacklist")).includes(interaction.user.id))
-                    return void errorEmbed(bot, interaction, "You're currently blacklisted from the client.", null, command)
+                    if(!command.blacklistAllowed && (await db.getValue("client", bot.user.id, "blacklist")).includes(interaction.user.id))
+                        return void await errorEmbed(bot, interaction, "You're currently blacklisted from the client.", null, command)
 
-                if(!interaction.deferred) await interaction.deferReply({ephemeral: command.ephemeral});
-
-                command.execute(bot, interaction, db)
+                    command.execute(bot, interaction, db)
+}
             }
         }
     }
