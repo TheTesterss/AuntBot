@@ -14,5 +14,7 @@ module.exports = {
 
         db.initializateGuilds();
         db.initializateBot();
+
+        //bot.application.commands.cache.forEach(command => command.delete())
     }
 }

@@ -6,7 +6,6 @@ const GuildSchema = new mongoose.Schema({
         required: true,
         type: String
     },
-    name: String
 })
 
 const GuildDB = mongoose.model("Guild", GuildSchema)

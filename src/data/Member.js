@@ -6,7 +6,6 @@ const MemberSchema = new mongoose.Schema({
         required: true,
         type: String
     },
-    name: String
 })
 
 const MemberDB = mongoose.model("Member", MemberSchema)

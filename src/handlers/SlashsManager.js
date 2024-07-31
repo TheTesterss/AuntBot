@@ -5,20 +5,19 @@ const fs = require("fs");
 
 /**
  * 
- * @param {{name: string, description: string, acceptDirectMessages: true | null, voiceOnly: boolean, ownerOnly: boolean, adminOnly: boolean, blacklistAllowed: boolean, whitelistAllowed: boolean, permissions: [], botPermissions: [], options: ApplicationCommandOptionBase, ephemeral: boolean, execute: (bot, command, db) => {}}} 
+ * @param {{name: string, description: string, voiceOnly: boolean, ownerOnly: boolean, adminOnly: boolean, blacklistAllowed: boolean, whitelistAllowed: boolean, permissions: [], botPermissions: [], options: ApplicationCommandOptionBase[], ephemeral: boolean, execute: (bot, command, db) => {}}} 
  * @returns 
  */
 const repairCommand = (command) => {
     if(!command.name) return;
     command.name = command.name
     command.description ??= "No description for this command."
-    command.acceptDirectMessages ??= null
     command.voiceOnly ??= false
     command.ownerOnly ??= false
     command.adminOnly ??= false
     command.blacklistAllowed ??= false
     command.whitelistAllowed ??= false
-    command.options ??= []
+    command.slash ??= null
     command.ephemeral ??= false
     command.permissions ??= []
     command.botPermissions ??= []
@@ -36,25 +35,52 @@ const createSlash = (command) => {
     .setName(command.name)
     .setDescription(command.description)
     .setNSFW(false)
-    .setDefaultMemberPermissions(PermissionsBitField.Flags[command.permissions[0]])
-    .setDMPermission(command.acceptDirectMessages)
+    .setDMPermission(false)
 
     if(command.options?.length < 1) slash.options = []
     for(const option of command.options) {
-        slash[`add${option.type.charAt(0).toUpperCase() + option.type.slice(1)}Option`]((option) => {
-            option
-            .setName(option.name)
-            .setDescription(option.description)
-            .setRequired(option.required)
+        switch(option.type) {
+            case "sub":
+                slash.addSubcommand((opt) => {
+                    opt.setName(option.name)
+                    opt.setDescription(option.description)
+                    for(const option1 of option.options) {
+                        opt[`add${option1.type.charAt(0).toUpperCase() + option1.type.slice(1)}Option`]((opt1) => {
+                            opt1
+                            .setName(option1.name)
+                            .setDescription(option1.description)
+                            .setRequired(option1.required)
+                        
+                            if(option1.type === "string" && !option1.choices)
+                                opt1.setAutocomplete(option.autocomplete)
+                        
+                            if(option1.type === "string" && option1.choices) {
+                                opt1.addChoices(option.choices)
+                            }
+        
+                            return opt1;
+                        })
+                    }
 
-            if(option.type === "string")
-                option.setAutocomplete(option.autocomplete)
-        })
+                    return opt
+                })
+                break;
+            default:
+                slash[`add${option.type.charAt(0).toUpperCase() + option.type.slice(1)}Option`]((opt) => {
+                    opt
+                    .setName(option.name)
+                    .setDescription(option.description)
+                    .setRequired(option.required)
+                
+                    if(option.type === "string" && !option.choices)
+                        opt.setAutocomplete(option.autocomplete)
+                
+                    if(option.type === "string" && option.choices) {
+                        opt.addChoices(option.choices)
+                    }
 
-        if(option.choices) {
-            for(const choice of option.choices.map((choice) => ({name: choice.name, value: choice.value}))) {
-                option.addChoices(choice);
-            }
+                    return opt;
+                })
         }
     }
 
@@ -76,12 +102,10 @@ module.exports = async (bot) => {
 
         for(const file of files) {
             let command = require(`../commands/${subFolder}/${file}`);
-
             /*  EVENT DATAS EXAMPLE:
             module.exports = {
                 name: string,
                 desription: string,
-                acceptDirectMessages: true | null,
                 voiceOnly: boolean,
                 ownerOnly: boolean,
                 adminOnly: boolean,
@@ -89,7 +113,7 @@ module.exports = async (bot) => {
                 whitelistAllowed: boolean,
                 permissions: string[],
                 botPermissions: string[],
-                options: ApplicationCommandOptions,
+                options: ApplicationCommandOptionBase[]
                 ephemeral: boolean,
                 execute: (bot, command, db) => {}
             }

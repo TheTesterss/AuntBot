@@ -10,8 +10,8 @@ const Database = require("../../handlers/DatabaseManager");
  */
 const MissPerms = (perms, member) => {
     let notIncluded = []
-    for(const perm of perms) {
-        if(!member.permissions.has(PermissionsBitField.Flags[perm]))
+    for(const perm of perms && perms) {
+        if(!member.permissions.has(PermissionsBitField.Flags[perm.replace("ManageMembers", "BanMembers")]))
             notIncluded.push(perm)
     }
 
@@ -20,14 +20,13 @@ const MissPerms = (perms, member) => {
 
 /**
  * 
- * @param {{name: string, description: string, acceptDirectMessages: true | null, voiceOnly: boolean, ownerOnly: boolean, adminOnly: boolean, blacklistAllowed: boolean, whitelistAllowed: boolean, permissions: [], botPermissions: [], options: ApplicationCommandOptionBase, ephemeral: boolean, execute: (bot, command, db) => {}}} 
+ * @param {{name: string, description: string, voiceOnly: boolean, ownerOnly: boolean, adminOnly: boolean, blacklistAllowed: boolean, whitelistAllowed: boolean, permissions: [], botPermissions: [], options: ApplicationCommandOptionBase[], ephemeral: boolean, execute: (bot, command, db) => {}}} 
  * @returns 
  */
 const repairCommand = (command) => {
     if(!command.name) return;
     command.name = command.name
     command.description ??= "No description for this command."
-    command.acceptDirectMessages ??= null
     command.voiceOnly ??= false
     command.ownerOnly ??= false
     command.adminOnly ??= false
@@ -67,22 +66,22 @@ module.exports = {
                     repairCommand(command);
 
                     if(command.voiceOnly && !interaction.member.voice.channel)
-                        return void await errorEmbed(bot, interaction, "You must be in a discord voice/stage channel!", null, command);
+                        return void await errorEmbed(bot, interaction, "Vous devez vous trouvez dans un canal vocal ou une conférence !", null, command);
 
                     if((command.ownerOnly && process.env.OWNER !== interaction.user.id) && (command.whitelistAllowed && !(await db.getValue("client", bot.user.id, "whitelist")).includes(interaction.user.id)))
-                        return void await errorEmbed(bot, interaction, "You're not the bot owner.", null, command);
+                        return void await errorEmbed(bot, interaction, "Seul mon propriétaire a accès à celà.", null, command);
 
                     if((command.adminOnly && interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) && (command.whitelistAllowed && !(await db.getValue("client", bot.user.id, "whitelist")).includes(interaction.user.id)))
-                        return void await errorEmbed(bot, interaction, "You must be an administrator of the guild.", null, command);
+                        return void await errorEmbed(bot, interaction, "Seul un administrateur peut exécuter ça.", null, command);
 
                     if(MissPerms(command.permissions, interaction.member) && (command.whitelistAllowed && !(await db.getValue("client", bot.user.id, "whitelist")).includes(interaction.user.id)))
-                        return void await errorEmbed(bot, interaction, "You're missing few perms.", "userPerms", command)
+                        return void await errorEmbed(bot, interaction, "Vous manquez de permissions.", "userPerms", command)
 
                     if(MissPerms(command.botPermissions, interaction.guild.members.me))
-                        return void await errorEmbed(bot, interaction, "I'm missing few permissions.", "botPerms", command)
+                        return void await errorEmbed(bot, interaction, "Je manque de permissions.", "botPerms", command)
 
                     if(!command.blacklistAllowed && (await db.getValue("client", bot.user.id, "blacklist")).includes(interaction.user.id))
-                        return void await errorEmbed(bot, interaction, "You're currently blacklisted from the client.", null, command)
+                        return void await errorEmbed(bot, interaction, "Vous êtes actuellement inclut dans ma liste noire.", null, command)
 
                     command.execute(bot, interaction, db)
 }

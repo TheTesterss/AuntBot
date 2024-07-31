@@ -15,21 +15,19 @@ module.exports = class Database {
 
         this.GuildDB = require("../data/Guild");
         this.UserDB = require("../data/User");
-        this.MemberDB = require("../data/Member");
         this.ClientDB = require("../data/Bot");
         this.bot = bot;
 
         this.names = {
             "client": "ClientDB",
             "user": "UserDB",
-            "member": "MemberDB",
             "guild": "GuildDB"
         }
     }
 
     /**
      * 
-     * @param {["client", "guild", "user", "member"]} type
+     * @param {"client" | "guild" | "user"} type
      * @param {string} id
      * @param {string} name 
      * @param {any} value 
@@ -40,7 +38,7 @@ module.exports = class Database {
 
     /**
      * 
-     * @param {["client", "guild", "user", "member"]} type
+     * @param {"client" | "guild" | "user"} type
      * @param {string} id
      * @param {string} name 
      * @returns any
@@ -52,7 +50,7 @@ module.exports = class Database {
 
     /**
      * 
-     * @param {["client", "guild", "user", "member"]} type
+     * @param {"client" | "guild" | "user"} type
      * @param {string} id
      * @param {string} name 
      * @param {any} value 
@@ -69,20 +67,20 @@ module.exports = class Database {
 
     /**
      * 
-     * @param {["client", "guild", "user", "member"]} type
+     * @param {"client" | "guild" | "user"} type
      * @param {string} id
      * @param {string} name 
      * @param {any} value 
      */
-        async removeValue(type, id, name, value) {
-            let list = await this[this.names[type]].findOne({ id });
+    async removeValue(type, id, name, value) {
+        let list = await this[this.names[type]].findOne({ id });
     
-            if(!list)
-                return void console.log(`Unable to load this list called: ${name}`);
+        if(!list)
+            return void console.log(`Unable to load this list called: ${name}`);
     
-            list[name] = list[name].filter((id) => id != value);
-            list.save();
-        }
+        list[name] = list[name].filter((id) => id != value);
+        list.save();
+    }
 
     async initializateGuilds() {
         for(const guild of this.bot.guilds.cache) {
