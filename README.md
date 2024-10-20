@@ -22,7 +22,7 @@ OWNER=YOUR_ID
 4. Download [these emojis](https://github.com/TheTesterss/AuntBot/tree/main/src/emojis/)
 5. One time downloaded, put them on a server where your bot has full access.
 6. Open a terminal and enter this command:
-```
+```bash
 yarn install
 yarn add mongoose discord.js fs dotenv colors nodemon
 npm start
